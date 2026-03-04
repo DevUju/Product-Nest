@@ -1,11 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { DeleteProductDto } from './dto/delete-product.dto';
 
 type Product = CreateProductDto & {
   id: number;
   createdAt: Date;
   updatedAt?: Date;
+  deletedAt?: Date;
 };
 
 @Injectable()
@@ -50,11 +56,22 @@ export class ProductsService {
     return updatedProduct;
   }
 
-  remove(id: number): void {
+  remove(id: number, deleteProductDto: DeleteProductDto): Product {
     const productIndex = this.products.findIndex((p) => p.id === id);
     if (productIndex === -1)
       throw new NotFoundException(`Product #${id} not found`);
 
+    if (!deleteProductDto.confirmDelete) {
+      throw new BadRequestException('Deletion not confirmed');
+    }
+
+    const deletedProduct: Product = {
+      ...this.products[productIndex],
+      ...deleteProductDto,
+      deletedAt: new Date(),
+    };
+
     this.products.splice(productIndex, 1);
+    return deletedProduct;
   }
 }

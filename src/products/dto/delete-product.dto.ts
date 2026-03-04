@@ -1,6 +1,9 @@
-import { IsNumber } from 'class-validator';
+import { IsBoolean, IsDateString, IsNumber, IsString } from 'class-validator';
 
 export class DeleteProductDto {
-  @IsNumber()
-  id: number;
+  @IsString()
+  reason: string;
+
+  @IsBoolean()
+  confirmDelete: boolean;
 }
