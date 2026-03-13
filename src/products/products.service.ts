@@ -17,15 +17,15 @@ export class ProductsService {
       ...createProductDto,
       owner: user,
     });
-    return this.productRepository.save(product);
+    return await this.productRepository.save(product);
   }
 
   async findAll(): Promise<Product[]> {
-    return this.productRepository.find({ relations: ['owner'] });
+    return await this.productRepository.find({ relations: ['owner'] });
   }
 
   async findOne(id: number): Promise<Product | null> {
-    return this.productRepository.findOne({
+    return await this.productRepository.findOne({
       where: { id },
       relations: ['owner'],
     });
@@ -45,7 +45,7 @@ export class ProductsService {
     }
 
     Object.assign(product, updateProductDto);
-    return this.productRepository.save(product);
+    return await this.productRepository.save(product);
   }
 
   async remove(id: number, user: User) {

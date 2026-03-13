@@ -11,24 +11,25 @@ export class UsersService {
     private userRepository: Repository<User>,
   ) {}
 
-  create(data: Partial<User>) {
+  async create(data: Partial<User>): Promise<User> {
     const user = this.userRepository.create(data);
-    return this.userRepository.save(user);
+    return await this.userRepository.save(user);
   }
 
-  findAll() {
-    return this.userRepository.find();
+  async findAll(): Promise<User[]> {
+    return await this.userRepository.find();
   }
 
-  findOne(id: number) {
-    return this.userRepository.findOne({ where: { id } });
+  async findOne(id: number): Promise<User | null> {
+    return await this.userRepository.findOne({ where: { id } });
   }
 
-  findByEmail(email: string) {
-    return this.userRepository.findOne({ where: { email } });
+  async findByEmail(email: string): Promise<User | null> {
+    return await this.userRepository.findOne({ where: { email } });
   }
 
-  delete(id: number) {
-    return this.userRepository.delete(id);
+  async delete(id: number): Promise<{ message: string }> {
+    await this.userRepository.delete(id);
+    return { message: 'User deleted successfully' };
   }
 }

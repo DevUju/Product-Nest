@@ -27,11 +27,13 @@ export class ProductsController {
     return this.productsService.create(createProductDto, user);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll() {
     return this.productsService.findAll();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.productsService.findOne(+id);
