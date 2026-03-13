@@ -2,22 +2,34 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ProductsModule } from './products/products.module';
-import { AuthMiddleware } from './common/middleware/auth-middleware';
-import { MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { join } from 'path';
+import { UsersModule } from './users/users/users.module';
+import { AuthModule } from './auth/auth/auth.module';
 
 @Module({
-  imports: [ProductsModule],
+  imports: [
+    ProductsModule,
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('DB_HOST'),
+        port: configService.get<number>('DB_PORT'),
+        username: configService.get<string>('DB_USERNAME'),
+        password: configService.get<string>('DB_PASSWORD'),
+        database: configService.get<string>('DB_NAME'),
+        entities: [join(__dirname, '**/*.entity{.ts,.js}')],
+        synchronize: true,
+      }),
+    }),
+    UsersModule,
+    AuthModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(AuthMiddleware)
-      .forRoutes(
-        { path: 'products', method: RequestMethod.POST },
-        { path: 'products/:id', method: RequestMethod.PATCH },
-        { path: 'products/:id', method: RequestMethod.DELETE },
-      );
-  }
-}
+export class AppModule {}

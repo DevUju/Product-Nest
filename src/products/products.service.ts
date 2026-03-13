@@ -1,77 +1,63 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Product } from './entities/product.entity';
+import { User } from 'src/users/entities/user.entity';
 import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { DeleteProductDto } from './dto/delete-product.dto';
-
-type Product = CreateProductDto & {
-  id: number;
-  createdAt: Date;
-  updatedAt?: Date;
-  deletedAt?: Date;
-};
 
 @Injectable()
 export class ProductsService {
-  private products: Product[] = [];
+  constructor(
+    @InjectRepository(Product)
+    private productRepository: Repository<Product>,
+  ) {}
 
-  create(createProductDto: CreateProductDto): Product {
-    const product: Product = {
-      id: this.products.length + 1,
+  async create(createProductDto: CreateProductDto, user: User) {
+    const product = this.productRepository.create({
       ...createProductDto,
-      createdAt: new Date(),
-    };
-    this.products.push(product);
-    return product;
+      owner: user,
+    });
+    return this.productRepository.save(product);
   }
 
-  findAll(): Product[] {
-    return this.products;
+  async findAll(): Promise<Product[]> {
+    return this.productRepository.find({ relations: ['owner'] });
   }
 
-  findOne(id: number): Product {
-    const product = this.products.find((p) => p.id === id);
+  async findOne(id: number): Promise<Product | null> {
+    return this.productRepository.findOne({
+      where: { id },
+      relations: ['owner'],
+    });
+  }
+
+  async update(
+    id: number,
+    updateProductDto: Partial<CreateProductDto>,
+    user: User,
+  ) {
+    const product = await this.productRepository.findOne({
+      where: { id, owner: { id: user.id } }, // ensure user owns the product
+    });
+
     if (!product) {
-      throw new NotFoundException(`Product #${id} not found`);
+      throw new Error('Product not found or not owned by user');
     }
-    return product;
+
+    Object.assign(product, updateProductDto);
+    return this.productRepository.save(product);
   }
 
-  update(id: number, updateProductDto: UpdateProductDto): Product {
-    const productIndex = this.products.findIndex((p) => p.id === id);
-    if (productIndex === -1) {
-      throw new NotFoundException(`Product ${id} not found`);
+  async remove(id: number, user: User) {
+    const product = await this.productRepository.findOne({
+      where: { id, owner: { id: user.id } },
+    });
+
+    if (!product) {
+      throw new Error('Product not found or not owned by user');
     }
 
-    const updatedProduct: Product = {
-      ...this.products[productIndex],
-      ...updateProductDto,
-      updatedAt: new Date(),
-    };
-
-    this.products[productIndex] = updatedProduct;
-    return updatedProduct;
-  }
-
-  remove(id: number, deleteProductDto: DeleteProductDto): Product {
-    const productIndex = this.products.findIndex((p) => p.id === id);
-    if (productIndex === -1)
-      throw new NotFoundException(`Product #${id} not found`);
-
-    if (!deleteProductDto.confirmDelete) {
-      throw new BadRequestException('Deletion not confirmed');
-    }
-
-    const deletedProduct: Product = {
-      ...this.products[productIndex],
-      ...deleteProductDto,
-      deletedAt: new Date(),
-    };
-
-    this.products.splice(productIndex, 1);
-    return deletedProduct;
+    await this.productRepository.remove(product);
+    return { message: 'Product deleted successfully' };
   }
 }

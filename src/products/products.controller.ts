@@ -3,48 +3,53 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
-  ParseIntPipe,
+  Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { DeleteProductDto } from './dto/delete-product.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { User } from 'src/users/entities/user.entity';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
+  async create(
+    @Body() createProductDto: CreateProductDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.productsService.create(createProductDto, user);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.productsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.productsService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return this.productsService.findOne(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateProductDto: UpdateProductDto,
+  async update(
+    @Param('id') id: string,
+    @Body() updateProductDto: Partial<CreateProductDto>,
+    @CurrentUser() user: User,
   ) {
-    return this.productsService.update(id, updateProductDto);
+    return this.productsService.update(+id, updateProductDto, user);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() deleteProductDto: DeleteProductDto,
-  ) {
-    return this.productsService.remove(id, deleteProductDto);
+  async remove(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.productsService.remove(+id, user);
   }
 }
