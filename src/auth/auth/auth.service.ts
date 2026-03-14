@@ -34,9 +34,11 @@ export class AuthService {
       password: hashedPassword,
     });
 
+    const { password: _, ...safeUser } = user;
+
     return {
       message: 'User created successfully',
-      user,
+      user: safeUser,
     };
   }
 

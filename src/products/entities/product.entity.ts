@@ -20,13 +20,13 @@ export class Product {
   @Column()
   description: string;
 
-  @Column()
+  @Column('decimal', { precision: 10, scale: 2, nullable: false })
   price: number;
 
   @Column()
   stock: number;
 
-  @ManyToOne(() => User, (user) => user.products)
+  @ManyToOne(() => User, (user) => user.products, { onDelete: 'CASCADE' })
   owner: User;
 
   @CreateDateColumn()
