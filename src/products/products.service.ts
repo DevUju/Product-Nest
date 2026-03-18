@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
@@ -37,11 +38,11 @@ export class ProductsService {
     user: User,
   ) {
     const product = await this.productRepository.findOne({
-      where: { id, owner: { id: user.id } }, // ensure user owns the product
+      where: { id, owner: { id: user.id } },
     });
 
     if (!product) {
-      throw new Error('Product not found or not owned by user');
+      throw new NotFoundException('Product not found or not owned by user');
     }
 
     Object.assign(product, updateProductDto);
@@ -54,7 +55,7 @@ export class ProductsService {
     });
 
     if (!product) {
-      throw new Error('Product not found or not owned by user');
+      throw new NotFoundException('Product not found or not owned by user');
     }
 
     await this.productRepository.remove(product);
