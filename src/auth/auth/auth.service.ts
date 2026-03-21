@@ -37,6 +37,7 @@ export class AuthService {
     const { password: _, ...safeUser } = user;
 
     return {
+      code: 0,
       message: 'User created successfully',
       user: safeUser,
     };
@@ -63,6 +64,7 @@ export class AuthService {
     };
 
     return {
+      code: 0,
       access_token: this.jwtService.sign(payload),
     };
   }

@@ -1,13 +1,5 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-
-import { User } from '../../users/entities/user.entity';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
 
 @Entity()
 export class Product {
@@ -20,18 +12,25 @@ export class Product {
   @Column()
   description: string;
 
-  @Column('decimal', { precision: 10, scale: 2, nullable: false })
+  @Column('decimal')
   price: number;
 
   @Column()
-  stock: number;
+  category: string;
 
-  @ManyToOne(() => User, (user) => user.products, { onDelete: 'CASCADE' })
+  @Column()
+  image_url: string;
+
+  @Column({ default: false })
+  instock: boolean;
+
+  @Column({ type: 'decimal', default: 0 })
+  rating: number;
+
+  // optional: store properties as JSON
+  @Column({ type: 'json', nullable: true })
+  properties?: { key: string; value: string }[];
+
+  @ManyToOne(() => User, (user) => user.products, { nullable: false })
   owner: User;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }
