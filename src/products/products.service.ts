@@ -5,30 +5,47 @@ import { Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { User } from 'src/users/entities/user.entity';
 import { CreateProductDto } from './dto/create-product.dto';
+import { Category } from 'src/categories/category.entity';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
+
+    @InjectRepository(Category)
+    private categoryRepository: Repository<Category>,
   ) {}
 
   async create(createProductDto: CreateProductDto, user: User) {
+    const { categoryId, ...productData } = createProductDto;
+
+    const category = await this.categoryRepository.findOne({
+      where: { id: categoryId },
+    });
+
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
     const product = this.productRepository.create({
-      ...createProductDto,
+      ...productData,
       owner: user,
+      category: category,
     });
     return await this.productRepository.save(product);
   }
 
   async findAll(): Promise<Product[]> {
-    return await this.productRepository.find({ relations: ['owner'] });
+    return await this.productRepository.find({
+      relations: ['owner', 'category'],
+    });
   }
 
   async findOne(id: number): Promise<Product | null> {
     return await this.productRepository.findOne({
       where: { id },
-      relations: ['owner'],
+      relations: ['owner', 'category'],
     });
   }
 

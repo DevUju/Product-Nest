@@ -1,5 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { Category } from '../../categories/category.entity';
 
 @Entity()
 export class Product {
@@ -15,8 +22,9 @@ export class Product {
   @Column('decimal')
   price: number;
 
-  @Column()
-  category: string;
+  @ManyToOne(() => Category, (category) => category.products, { eager: true })
+  @JoinColumn({ name: 'categoryId' })
+  category: Category;
 
   @Column()
   image_url: string;

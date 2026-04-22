@@ -35,9 +35,9 @@ export class CreateProductDto {
   @Min(50)
   price: number;
 
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  category: string;
+  categoryId: number;
 
   @IsString()
   @IsUrl()
