@@ -25,6 +25,7 @@ import { CategoriesModule } from './categories/categories.module';
         database: configService.get<string>('DB_NAME'),
         entities: [join(__dirname, '**/*.entity{.ts,.js}')],
         synchronize: true,
+        url: process.env.DATABASE_URL,
       }),
     }),
     UsersModule,
