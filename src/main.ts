@@ -24,7 +24,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:4200',
-      'https://sparkling-griffin-a31343.netlify.app/',
+      'https://dainty-rugelach-404c9c.netlify.app/',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
