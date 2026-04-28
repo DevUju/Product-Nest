@@ -22,10 +22,7 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
 
   app.enableCors({
-    origin: [
-      'http://localhost:4200',
-      'https://dainty-rugelach-404c9c.netlify.app/',
-    ],
+    origin: ['http://localhost:4200', 'https://easyfashion.netlify.app/'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
